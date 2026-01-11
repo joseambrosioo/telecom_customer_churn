@@ -319,7 +319,7 @@ prepare_tab = html.Div(
         ], className="p-4 bg-light border-bottom mb-4"),
 
         html.P("Before we can build a predictive model, we need to understand and clean our data."),
-        html.H5("Data Source"),
+        html.H5("Data Source Summary"),
         html.P(
             ["We used a standard telecom churn dataset, divided into a ", html.B("training set"), " (80% of data) to build our models and a separate ", html.B("test set"), " (20%) to check if our models work on new, unseen data."]
         ),
@@ -353,11 +353,54 @@ prepare_tab = html.Div(
                 ),
             ]
         ),
-        html.H4("Statistical Summary", className="mt-4"),
-        html.P("This table provides a quick statistical overview of the features. Note the perfect linear relationship between minutes and charges for different call types. To avoid multicollinearity in our models, we removed charge-related columns."),
-        dbc.Table.from_dataframe(telcom.describe().T.reset_index().rename(columns={'index': 'Feature'}).round(2),
-                                 striped=True, bordered=True, hover=True),
-        html.H5("Dataset Sample (First 10 Rows)", className="mt-4"),
+        
+        # --- Statistical Summary & Data Dictionary Section ---
+        html.H5("Statistical Summary & Feature Governance", className="d-inline"),
+        html.P([
+            "This table provides a deep-dive into feature distribution and business logic. ",
+            html.B("Note:"), " We identified a perfect linear relationship between usage minutes and charges. To prevent ", 
+            html.I("multicollinearity"), "—which can distort model weights—all charge-related columns were removed during preprocessing."
+        ]),
+
+        html.Div([
+            html.H5("Comprehensive Feature Dictionary", className="d-inline"),
+            dbc.Button(
+                "📥 Export Dictionary (CSV)", 
+                id="btn-download-dict", 
+                color="secondary", 
+                size="sm", 
+                className="ms-3 mb-2",
+                outline=True
+            ),
+            dcc.Download(id="download-feature-dict")
+        ]),
+
+        # Searchable and Sortable Data Dictionary Table
+        dash_table.DataTable(
+            id='feature-dictionary-table',
+            # Note: Using full_feature_list which was defined in your loading section
+            columns=[{"name": i, "id": i} for i in full_feature_list.columns],
+            data=full_feature_list.to_dict('records'),
+            filter_action="native",
+            sort_action="native",
+            page_size=10,
+            style_table={'overflowX': 'auto', 'width': '100%'},
+            style_header={
+                'backgroundColor': 'rgb(230, 230, 230)',
+                'fontWeight': 'bold',
+                'textAlign': 'center',
+            },
+            style_cell={
+                'textAlign': 'left',
+                'padding': '10px',
+                'font-size': '12px',
+                'minWidth': '100px', 'width': 'auto', 'maxWidth': '200px',
+                'overflow': 'hidden',
+                'textOverflow': 'ellipsis',
+            },
+        ),
+
+        html.H5("Dataset Sample (First 10 Rows)", className="mt-2"),
         dash_table.DataTable(
             id='sample-table',
             columns=columns_with_types,
@@ -1513,6 +1556,15 @@ def download_local_churn_audit(n_clicks, cust_idx, model_name, result_text):
     pdf.cell(0, 10, f"Report ID: {report_id} | Proprietary Retention Analytics", ln=True, align='C')
 
     return dcc.send_bytes(pdf.output(dest='S').encode('latin-1'), f"Churn_Audit_Acc_{cust_idx}.pdf")
+
+@app.callback(
+    Output("download-feature-dict", "data"),
+    Input("btn-download-dict", "n_clicks"),
+    prevent_initial_call=True,
+)
+def download_churn_dictionary(n_clicks):
+    return dcc.send_data_frame(full_feature_list.to_csv, "Full_Data_Telecom_Dictionary.csv", index=False)
+    
 
 @app.callback(
     Output("scenario-storage", "data"),
