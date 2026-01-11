@@ -891,7 +891,7 @@ app.layout = dbc.Container([
         dbc.Tab(tab_explain, label="Explain", tab_id="tab-explain"),
         dbc.Tab(tab_simulate, label="Simulate", tab_id="tab-simulate"),
         dbc.Tab(tab_act, label="Act", tab_id="tab-act"),
-    ], id="main-tabs", active_tab="tab-ask"),
+    ], id="main-tabs", active_tab="tab-simulate"),
     # REMOVED: dcc.Store(id='scenario-storage', data=[])  <-- This was the duplicate
 ], fluid=True)
 
