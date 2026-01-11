@@ -233,7 +233,7 @@ header = dbc.Navbar(
                     dbc.NavbarBrand("Telecom Customer Churn Prediction", class_name="fw-bold text-wrap", style={"color": "black"}),
                 ], className="d-flex align-items-center"
             ),
-            dbc.Badge("Dashboard", color="primary", className="ms-auto")
+            dbc.Badge("DS/ML App", color="info", className="ms-auto")
         ]
     ),
     color="light",
@@ -241,18 +241,49 @@ header = dbc.Navbar(
 )
 
 # 1. ASK Tab
-ask_tab = dcc.Markdown(
-    """
-    ### ❓ **ASK** — The Overview
-    This section defines the project purpose and its business value.
+ask_tab = html.Div([
+    # Header Section
+    html.Div([
+        html.H3("❓ ASK — The Business Question", className="mb-0"),
+        html.P("Defining the core objectives and stakeholder requirements for customer retention analytics.", className="text-muted"),
+    ], className="p-4 bg-light border-bottom mb-4"),
 
-    **Business Task**: The goal is to predict which customers are likely to stop using our service, a process known as **customer churn**. For telecom companies, keeping existing customers is much cheaper than finding new ones. By predicting churn, we can proactively contact at-risk customers and try to win them back.
+    dbc.Container([
+        dbc.Row([
+            dbc.Col([
+                html.Div([
+                    # Business Task
+                    html.B("Business Task", style={"font-size": "1.2rem"}),
+                    html.P([
+                        "The primary objective is to develop a predictive system capable of identifying customers at high risk of ",
+                        html.B("churning"), 
+                        " within the telecom ecosystem. Customer acquisition costs significantly outweigh retention costs. By identifying at-risk accounts, the company can proactively deploy ",
+                        html.B("targeted intervention strategies"), 
+                        " to minimize revenue loss and increase long-term customer lifetime value (CLV)."
+                    ]),
 
-    **Stakeholders**: The key decision-makers who will use this dashboard are **Marketing** and **Customer Service**. They need this information to plan targeted campaigns and retention strategies. Executive leadership also benefits from a high-level view of our customer retention efforts.
+                    # Stakeholders
+                    html.B("Stakeholders", style={"font-size": "1.2rem"}),
+                    html.P([
+                        "The key decision-makers for this project include ",
+                        html.B("Marketing Strategists, Customer Service Management,"),
+                        " and ",
+                        html.B("Executive Leadership"),
+                        ". These teams require data-driven insights to optimize promotional spend and improve service quality in categories most likely to trigger customer exits."
+                    ]),
 
-    **Deliverables**: The final product is this dashboard, which offers a clear step-by-step of our analysis and presents key findings and recommendations.
-    """, className="p-4"
-)
+                    # Deliverables
+                    html.B("Deliverables", style={"font-size": "1.2rem"}),
+                    html.P([
+                        "The final product is this ",
+                        html.B("Telecom Retention Dashboard"),
+                        ", an interactive application that processes historical usage patterns, evaluates multiple machine learning models (LGBM, XGBoost, Random Forest), and provides a simulated environment to test the sensitivity of churn drivers."
+                    ]),
+                ], className="p-3 bg-white") 
+            ], md=12) 
+        ])
+    ], fluid=True)
+])
 
 # 1. ASK Tab (Restructured to html.Div)
 # tab_ask = html.Div([
@@ -282,10 +313,11 @@ telcom_raw_display['Churn'] = telcom_raw_display['Churn'].astype(str)
 
 prepare_tab = html.Div(
     children=[
-        html.H4(
-            ["📝 ", html.B("PREPARE"), " — Preparing the Data"],
-            className="mt-4"
-        ),
+        html.Div([
+            html.H4(["📝 ", html.B("PREPARE"), " — Preparing the Data"], className="mt-4"),
+            html.P("Identify which specific customer behaviors (Usage, Service Calls, Plans) triggered the churn alert."),
+        ], className="p-4 bg-light border-bottom mb-4"),
+
         html.P("Before we can build a predictive model, we need to understand and clean our data."),
         html.H5("Data Source"),
         html.P(
@@ -354,10 +386,11 @@ prepare_tab = html.Div(
 # 3. ANALYZE Tab with sub-tabs
 analyze_tab = html.Div(
     children=[
-        html.H4(
-            ["📈 ", html.B("ANALYZE"), " — Finding Patterns and Building Models"],
-            className="mt-4"
-        ),
+        html.Div([
+            html.H4(["📈 ", html.B("ANALYZE"), " — Finding Patterns and Building Models"], className="mt-4"),
+            html.P("Identify which specific customer behaviors (Usage, Service Calls, Plans) triggered the churn alert."),
+        ], className="p-4 bg-light border-bottom mb-4"),
+
         html.P("This is where we explore data and build the predictive brain of our dashboard."),
         dbc.Tabs([
             dbc.Tab(label="Exploratory Data Analysis", children=[
@@ -408,6 +441,7 @@ analyze_tab = html.Div(
                             html.B("churn"),
                             "."
                         ]),
+                        html.Hr(),
                         html.H5("Feature Visualization", className="mt-4"),
                         html.P([
                             "This plot visualizes data using two ",
@@ -448,45 +482,35 @@ analyze_tab = html.Div(
             dbc.Tab(label="Model Performance (Training)", children=[
                 html.Div(
                     children=[
-                        html.H5("Model Performance on Training Data", className="mt-4"),
-                        html.P("We trained a variety of machine learning models to see which one performs best."),
-                        html.P(
-                            [html.B("The Problem with Accuracy"), ": For our unbalanced data, ", html.B("Accuracy"), " (percentage of correct predictions) is not the best metric. A model that always predicts 'no churn' could have 85% accuracy but would be useless for identifying at-risk customers."]
-                        ),
-                        html.P(
-                            [html.B("Key Metrics"), ": We focus on a more complete set of metrics:",
-                            html.Ul([
-                                html.Li([html.B("Recall"), " – how many customers who actually churned did we catch?"]),
-                                html.Li([html.B("Precision"), " – of those we flagged as churners, how many were correct?"]),
-                                html.Li([html.B("F1-Score"), " – a balance between Precision and Recall."]),
-                                html.Li([html.B("ROC-AUC"), " – how well the model separates churners from non-churners."])
-                            ])
-                            ]
-                        ),
-                        generate_static_metrics_summary(metrics_train, 'training'),
-                        dbc.Row([dbc.Col(dcc.Graph(id="train-metrics-bar"), md=12)]),
+                        dbc.Row([
+                            # Column 1: The Graph
+                            dbc.Col([
+                                dcc.Graph(id="train-metrics-bar")
+                                # dbc.Row([dbc.Col(dcc.Graph(id="train-metrics-bar"), md=12)]),
+                            ], md=7),
+
+                            # Column 2: The Explanatory Text
+                            dbc.Col([
+                                html.H5("Model Performance on Training Data", className="mt-4"),
+                                html.P("We trained a variety of machine learning models to see which one performs best."),
+                                html.P(
+                                    [html.B("The Problem with Accuracy"), ": For our unbalanced data, ", html.B("Accuracy"), " (percentage of correct predictions) is not the best metric. A model that always predicts 'no churn' could have 85% accuracy but would be useless for identifying at-risk customers."]
+                                ),
+                                html.P(
+                                    [html.B("Key Metrics"), ": We focus on a more complete set of metrics:",
+                                    html.Ul([
+                                        html.Li([html.B("Recall"), " – how many customers who actually churned did we catch?"]),
+                                        html.Li([html.B("Precision"), " – of those we flagged as churners, how many were correct?"]),
+                                        html.Li([html.B("F1-Score"), " – a balance between Precision and Recall."]),
+                                        html.Li([html.B("ROC-AUC"), " – how well the model separates churners from non-churners."])
+                                    ])
+                                    ]
+                                ),
+                                generate_static_metrics_summary(metrics_train, 'training'),
+                            ], md=5),
+                        ], className="align-items-center"), # This centers the content vertically
                         html.Hr(),
                         html.H5("Confusion Matrix and ROC Curve", className="mt-4"),
-                        html.H6("Confusion Matrix", className="mt-4"),
-                        html.P([
-                            "The confusion matrix is a table that breaks down our model's predictions into four categories:",
-                            html.Ul([
-                                html.Li([html.B("True Positives (TP):"), " Customers the model correctly predicted would churn."]),
-                                html.Li([html.B("True Negatives (TN):"), " Customers the model correctly predicted would not churn."]),
-                                html.Li([html.B("False Positives (FP):"), " Customers the model incorrectly predicted would churn (Type I Error)."]),
-                                html.Li([html.B("False Negatives (FN):"), " Customers who would churn, but the model missed (Type II Error). This is the costliest category."])
-                            ])
-                        ]),
-                        generate_static_confusion_summary(metrics_train, 'training'),
-                        html.H6("ROC Curve (Receiver Operating Characteristic)", className="mt-4"),
-                        html.P([
-                            "The ROC curve plots the ",
-                            html.B("True Positive Rate"),
-                            " against the ",
-                            html.B("False Positive Rate"),
-                            ". The closer the curve is to the top-left corner, the better the model differentiates between the two classes."
-                        ]),
-                        generate_static_roc_summary(metrics_train, 'training'),
                         html.P("Select a model to view metrics, Confusion Matrix, and ROC Curve (Training):"),
                         dcc.Dropdown(
                             id='model-selector-train',
@@ -501,6 +525,34 @@ analyze_tab = html.Div(
                             dbc.Col(dcc.Graph(id="train-roc-curve"), md=6),
                         ]),
                         html.Div(id='selected-train-roc-summary'),
+                        dbc.Row([
+                            # Column 1: Confusion Matrix Details
+                            dbc.Col([
+                                html.H6("Confusion Matrix", className="mt-4"),
+                                html.P([
+                                    "The confusion matrix is a table that breaks down our model's predictions into four categories:",
+                                    html.Ul([
+                                        html.Li([html.B("True Positives (TP):"), " Customers the model correctly predicted would churn."]),
+                                        html.Li([html.B("True Negatives (TN):"), " Customers the model correctly predicted would not churn."]),
+                                        html.Li([html.B("False Positives (FP):"), " Customers the model incorrectly predicted would churn (Type I Error)."]),
+                                        html.Li([html.B("False Negatives (FN):"), " Customers who would churn, but the model missed (Type II Error). This is the costliest category."])
+                                    ])
+                                ]),
+                                generate_static_confusion_summary(metrics_train, 'training'),
+                            ], md=6),
+                            # Column 2: ROC Curve Details
+                            dbc.Col([
+                                html.H6("ROC Curve (Receiver Operating Characteristic)", className="mt-4"),
+                                html.P([
+                                    "The ROC curve plots the ",
+                                    html.B("True Positive Rate"),
+                                    " against the ",
+                                    html.B("False Positive Rate"),
+                                    ". The closer the curve is to the top-left corner, the better the model differentiates between the two classes."
+                                ]),
+                                generate_static_roc_summary(metrics_train, 'training'),
+                        ], md=6),
+                        ], className="mb-4"),
                         html.Hr(),
                         html.H5("Feature Importance (for tree-based models)", className="mt-4"),
                         html.P("This chart ranks features based on how much they contributed to the model's prediction."),
@@ -517,15 +569,13 @@ analyze_tab = html.Div(
                 html.Div(
                     children=[
                         html.H5("Model Performance on Test Data", className="mt-4"),
+                        dbc.Row([dbc.Col(dcc.Graph(id="test-metrics-bar"), md=12)]),
                         html.P(
                             ["We tested our main models on unseen data to ensure they are not ", html.B("overfitting"), " (memorizing training data instead of learning general patterns)."]
                         ),
                         generate_static_metrics_summary(metrics_test, 'test'),
-                        dbc.Row([dbc.Col(dcc.Graph(id="test-metrics-bar"), md=12)]),
                         html.Hr(),
                         html.H5("Confusion Matrix and ROC Curve", className="mt-4"),
-                        generate_static_confusion_summary(metrics_test, 'test'),
-                        generate_static_roc_summary(metrics_test, 'test'),
                         html.P("Select a model to view metrics, Confusion Matrix, and ROC Curve (Test):"),
                         dcc.Dropdown(
                             id='model-selector-test',
@@ -540,6 +590,8 @@ analyze_tab = html.Div(
                             dbc.Col(dcc.Graph(id="test-roc-curve"), md=6),
                         ]),
                         html.Div(id='selected-test-roc-summary'),
+                        generate_static_confusion_summary(metrics_test, 'test'),
+                        generate_static_roc_summary(metrics_test, 'test'),
                     ], className="p-4"
                 )
             ]),
